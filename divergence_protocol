@@ -1,0 +1,56 @@
+#Move Prokka *.faa files to the DB folder of OMA and change faa extension to fa
+for f in *.faa; do mv -- "$f" "${f%.faa}.fa"; done
+
+#Run OMA to identify orthologous genes
+
+./bin/oma -c -n 1
+./bin/oma -W 561600 -n 32
+
+#Find subset of orthologous genes present in all organisms using count_entries.py (in repo) and move to new subdirectory (NB: Change "if count" value to number of organisms in OMA run)
+rsync -aSvuc `cat list_of_files` /path/to/destination
+
+#Remove [] brackets from orthologous genes fasta files
+for i in *.fa; do sed 's/\[[^]]*\]//g' $i > ${i/.fa/edited.fa};done
+
+#Concatenate all prokka ffn files
+cat *.ffn > All_seqs.ffn
+
+#Align orthologous genes using muscle
+for protein_file in `ls *edited.fa`
+do
+        muscle -in ${protein_file} -out ${protein_file/.fa/.aln}
+done
+
+#Cluster sequences into new genome fasta files (i.e. sequences are clustered by genome rather than sequence similarity)
+python merge_fastas_for_dSdN.py /path/to/OG/files aln text_file_listing_genomes_one_per_line
+
+#Run streamlined_seqretriever.py (available in repo) to extract nucleotide seqs corresponding to orthologous genes
+python streamlined_seqretriever.py /path/to/orthologous/gene/fasta/files /path/to/cat/ffn/file
+
+#Remove stop codons from nucleotide files
+python remove_stop_codons.py /path/to/nuc/files
+
+#Create "super genes" i.e. concatenate all protein and nucleotide seqs per genome
+for file in `ls *multifasta.aln`; do
+        union -filter ${file} > ${file/multifasta.aln/_merged.fa}
+done
+
+for file in `ls *multifasta_nuc_without_stop.fasta`; do
+        union -filter ${file} > ${file/multifasta_nuc_without_stop.fasta/_merged.fasta}
+done
+
+#Concatenate all super genes into single *.faa and *.fasta files
+cat *_merged.fa > Final.faa
+cat *_merged.fasta > Final.fasta
+
+#Run pal2nal
+docker run --rm -v /home/sam/Tools/OMA_2_4_1/Tethybacterales/OrthologousGroupsFasta/:/output \
+evanrees/kwanlab:pal2nal pal2nal.pl /output/Final.faa /output/Final.fasta \
+-output paml -codontable 11 > /home/sam/Tools/OMA_2_4_1/Tethybacterales/OrthologousGroupsFasta/Final.paml
+
+#Run PAML
+docker run --rm -w /output \
+-v /home/sam/Tools/OMA_2_4_1/Tethybacterales/OrthologousGroupsFasta/Common_OGs/:/output \
+evanrees/kwanlab:pal2nal codeml All_control_file.ctl
+
+**Note: I ran several iterations of pal2nal with different values of omega to find the greatest average likelihood score. Mine came to be 0.05, but yours may differ if you follow this workflow with a different dataset.
