@@ -16,10 +16,7 @@ for i in *.fa; do sed 's/\[[^]]*\]//g' $i > ${i/.fa/edited.fa};done
 cat *.ffn > All_seqs.ffn
 
 #Align orthologous genes using muscle
-for protein_file in `ls *edited.fa`
-do
-        muscle -in ${protein_file} -out ${protein_file/.fa/.aln}
-done
+for protein_file in `ls *edited.fa`;do muscle -align ${protein_file} -output ${protein_file/.fa/.aln};done
 
 #Cluster sequences into new genome fasta files (i.e. sequences are clustered by genome rather than sequence similarity)
 python merge_fastas_for_dSdN.py /path/to/OG/files .aln text_file_listing_genomes_one_per_line
@@ -31,13 +28,8 @@ python streamlined_seqretriever.py /path/to/orthologous/gene/fasta/files /path/t
 python remove_stop_codons.py /path/to/nuc/files
 
 #Create "super genes" i.e. concatenate all protein and nucleotide seqs per genome
-for file in `ls *multifasta.aln`; do
-        union -filter ${file} > ${file/multifasta.aln/_merged.fa}
-done
-
-for file in `ls *multifasta_nuc_without_stop.fasta`; do
-        union -filter ${file} > ${file/multifasta_nuc_without_stop.fasta/_merged.fasta}
-done
+for file in `ls *multifasta.aln`; do union -filter ${file} > ${file/multifasta.aln/_merged.fa};done
+for file in `ls *multifasta_nuc_without_stop.fasta`; do union -filter ${file} > ${file/multifasta_nuc_without_stop.fasta/_merged.fasta};done
 
 #Concatenate all super genes into single *.faa and *.fasta files
 cat *_merged.fa > Final.faa
