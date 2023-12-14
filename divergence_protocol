@@ -22,7 +22,7 @@ do
 done
 
 #Cluster sequences into new genome fasta files (i.e. sequences are clustered by genome rather than sequence similarity)
-python merge_fastas_for_dSdN.py /path/to/OG/files aln text_file_listing_genomes_one_per_line
+python merge_fastas_for_dSdN.py /path/to/OG/files .aln text_file_listing_genomes_one_per_line
 
 #Run streamlined_seqretriever.py (available in repo) to extract nucleotide seqs corresponding to orthologous genes
 python streamlined_seqretriever.py /path/to/orthologous/gene/fasta/files /path/to/cat/ffn/file
