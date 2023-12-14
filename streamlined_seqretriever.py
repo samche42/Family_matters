@@ -10,7 +10,7 @@ input_directory = sys.argv[1]
 nucleotide_file = sys.argv[2]
 #nucleotide_file is path the conactenated nucleotide file corresponding to proteins
 
-protein_file_list = [os.path.abspath(fn) for fn in glob(input_directory+'/*.fa')]
+protein_file_list = [os.path.abspath(fn) for fn in glob(input_directory+'/*multifasta.aln')]
 #creation of list that hold fullpath to each OG file to be parsed
 
 for OG_group in protein_file_list:
