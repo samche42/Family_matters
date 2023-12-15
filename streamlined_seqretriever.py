@@ -14,7 +14,7 @@ protein_file_list = [os.path.abspath(fn) for fn in glob(input_directory+'/*multi
 #creation of list that hold fullpath to each OG file to be parsed
 
 for OG_group in protein_file_list:
-        output_file = (os.path.abspath(OG_group))[:-3]+"_nuc.fasta"
+        output_file = (os.path.abspath(OG_group))[:-4]+"_nuc.fasta"
         #outputfile named the same as input OG file
         wanted = list(r.id for r in SeqIO.parse(OG_group, "fasta"))
         #lists all headers in OG file
