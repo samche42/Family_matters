@@ -10,14 +10,14 @@ input_directory = sys.argv[1]
 nucleotide_file = sys.argv[2]
 #nucleotide_file is path the conactenated nucleotide file corresponding to proteins
 
-multifasta_file_list = [os.path.abspath(fn) for fn in glob(input_directory+'/*multifasta.aln')]
+multifasta_file_list = [os.path.abspath(fn) for fn in glob(input_directory+'/*multifasta.al$
 #creation of list that hold fullpath to each multifasta file to be parsed
 print(str(multifasta_file_list))
 
 for file in multifasta_file_list:
         records = []
         wanted = []
-        output_file = os.path.abspath(file).split(".")[0]+"_nuc.fasta"
+        output_file = (os.path.abspath(file))[:-4]+"_nuc.fasta"
         print(os.path.abspath(output_file))
 #       outputfile named the same as input OG file
         wanted = list(r.id for r in SeqIO.parse(file, "fasta"))
